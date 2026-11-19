@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Showtime – Book movie tickets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f5fa;--ink:#1c1733;--mute:#6d6785;--line:#e3deee;--card:#fff;--red:#e8334a;--green:#12a37f;--gold:#f2b134}
+*{box-sizing:border-box;margin:0}
+body{font-family:'Bricolage Grotesque',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+header{background:var(--ink);color:#fff;position:sticky;top:0;z-index:5}
+.bar{max-width:1100px;margin:auto;padding:14px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.logo{font-weight:800;font-size:1.5rem;letter-spacing:-.03em}
+.logo span{color:var(--red)}
+.bar input,.bar select{background:#2d2750;border:1px solid #433b75;border-radius:10px;padding:9px 12px;color:#fff}
+.bar input{flex:1;min-width:160px}
+.bar .tix{background:var(--red);padding:9px 16px;border-radius:10px;font-weight:600}
+main{max-width:1100px;margin:auto;padding:28px 20px 60px}
+h1{font-size:clamp(1.8rem,4vw,2.6rem);letter-spacing:-.03em;font-weight:800}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 26px}
+.chip{padding:7px 16px;border:1px solid var(--line);border-radius:99px;background:var(--card);font-size:.92rem}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:22px}
+.m{text-align:left;display:block;transition:transform .15s}
+.m:hover{transform:translateY(-4px)}
+.poster{aspect-ratio:2/3;border-radius:16px;padding:16px;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden}
+.poster h3{font-size:1.7rem;line-height:1;letter-spacing:-.04em;font-weight:800;text-wrap:balance}
+.poster small{opacity:.85;margin-top:8px}
+.score{position:absolute;top:12px;left:12px;background:rgba(0,0,0,.55);padding:3px 10px;border-radius:99px;font-size:.85rem;font-weight:600}
+.m p{margin-top:8px;font-weight:600}
+.m span{color:var(--mute);font-size:.88rem}
+.empty{padding:50px 0;color:var(--mute)}
+#view{position:fixed;inset:0;background:var(--bg);overflow:auto;display:none;z-index:10}
+#view.open{display:block}
+.wrap{max-width:900px;margin:auto;padding:20px 20px 120px}
+.back{color:var(--mute);font-weight:600;margin-bottom:14px}
+.head{display:flex;gap:20px;align-items:flex-start;margin-bottom:22px}
+.head .poster{width:120px;flex:none;padding:10px;font-size:.6rem}
+.head .poster h3{font-size:1.05rem}
+.head p{color:var(--mute);max-width:56ch}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.tags b{font-weight:600;font-size:.8rem;border:1px solid var(--line);border-radius:6px;padding:2px 8px;background:var(--card)}
+.dates{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin-bottom:18px}
+.date{flex:none;padding:8px 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:600}
+.date.on{background:var(--red);color:#fff;border-color:var(--red)}
+.th{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:12px}
+.th h4{font-size:1.05rem;margin-bottom:10px}
+.times{display:flex;gap:10px;flex-wrap:wrap}
+.time{border:1px solid var(--green);color:var(--green);border-radius:10px;padding:6px 14px;font-weight:600}
+.time.on{background:var(--green);color:#fff}
+.seats{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 16px;margin-top:20px;text-align:center;overflow-x:auto}
+.screen{height:14px;width:70%;margin:0 auto 6px;border-radius:50% 50% 0 0/100% 100% 0 0;background:linear-gradient(var(--line),transparent)}
+.scr-l{font-size:.8rem;color:var(--mute);margin-bottom:18px}
+.row{display:flex;justify-content:center;gap:6px;margin-bottom:6px;align-items:center}
+.row i{width:18px;font-style:normal;color:var(--mute);font-size:.8rem}
+.s{width:30px;height:28px;border-radius:7px 7px 4px 4px;border:1.5px solid var(--green);font-size:.7rem;color:var(--green)}
+.s:nth-of-type(5){margin-right:20px}
+.s.t{background:var(--line);border-color:var(--line);color:transparent;cursor:not-allowed}
+.s.on{background:var(--green);color:#fff}
+.tier{font-size:.78rem;color:var(--mute);margin:12px 0 6px}
+.legend{display:flex;gap:18px;justify-content:center;margin-top:16px;font-size:.82rem;color:var(--mute)}
+.legend u{display:inline-block;width:14px;height:14px;border-radius:4px;border:1.5px solid var(--green);vertical-align:-2px;margin-right:6px}
+.pay{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:#fff;padding:14px 20px;z-index:11}
+.pay div{max-width:900px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.pay button{background:var(--red);color:#fff;padding:11px 24px;border-radius:10px;font-weight:600}
+.pay button:disabled{opacity:.4;cursor:not-allowed}
+.ticket{max-width:420px;margin:30px auto;background:var(--card);border-radius:20px;overflow:hidden;border:1px solid var(--line)}
+.ticket .top{padding:22px;color:#fff}
+.ticket .top h2{letter-spacing:-.03em;font-size:1.8rem;line-height:1.05}
+.ticket dl{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:22px;border-bottom:2px dashed var(--line)}
+.ticket dt{font-size:.8rem;color:var(--mute)}
+.ticket dd{font-weight:600}
+.ticket .qr{padding:20px;text-align:center}
+.ticket .qr svg{width:120px;height:120px}
+.ticket .qr p{font-size:.85rem;color:var(--mute);margin-top:6px}
+.ok{text-align:center;color:var(--green);font-weight:800;font-size:1.3rem}
+.btn{display:block;margin:0 auto;background:var(--ink);color:#fff;padding:11px 26px;border-radius:10px;font-weight:600}
+@media(max-width:560px){.head{flex-direction:column}.s{width:24px;height:24px}.s:nth-of-type(5){margin-right:12px}}
+</style>
+</head>
+<body>
+<header><div class="bar">
+  <div class="logo">show<span>time</span></div>
+  <select id="city" aria-label="City"><option>Gurugram</option><option>Delhi</option><option>Mumbai</option><option>Bengaluru</option><option>Hyderabad</option></select>
+  <input id="q" type="search" placeholder="Search for movies" aria-label="Search movies">
+  <button class="tix" onclick="myTickets()">My tickets</button>
+</div></header>
+<main>
+  <h1 id="h1">Now showing</h1>
+  <div class="chips" id="chips"></div>
+  <div class="grid" id="grid"></div>
+</main>
+<div id="view" role="dialog" aria-modal="true"></div>
+
+<script>
+const movies=[
+ {id:1,t:'Midnight Express 9',g:['Thriller'],l:'Hindi',d:'2h 18m',r:'U/A',s:8.4,c:['#e8334a','#3b0d3f'],o:'A night train, nine passengers and one stolen briefcase. Nobody gets off before dawn.'},
+ {id:2,t:'The Last Monsoon',g:['Drama','Romance'],l:'Hindi',d:'2h 31m',r:'U',s:8.9,c:['#12a37f','#0b2c4a'],o:'Two strangers share a rooftop in Mumbai through the longest rains in forty years.'},
+ {id:3,t:'Pixel Pirates',g:['Animation','Comedy'],l:'English',d:'1h 40m',r:'U',s:7.8,c:['#f2b134','#d1357d'],o:'A crew of game characters sails out of the arcade to find the real world.'},
+ {id:4,t:'Dhoom Gully',g:['Action','Comedy'],l:'Hindi',d:'2h 45m',r:'U/A',s:7.5,c:['#ff6b35','#2a0f5c'],o:'Three cousins, one wedding band and a gang that wants the drummer back.'},
+ {id:5,t:'Orbit Zero',g:['Sci-Fi','Thriller'],l:'English',d:'2h 24m',r:'U/A',s:8.2,c:['#3a6cf4','#0a0a2e'],o:'A repair crew on a failing station has ninety minutes of air and one working shuttle.'},
+ {id:6,t:'Kaveri Calling',g:['Drama'],l:'Tamil',d:'2h 09m',r:'U',s:8.6,c:['#c47a1e','#27402b'],o:'A retired postmaster delivers one last bundle of letters along the river.'},
+ {id:7,t:'Haunted Hostel',g:['Horror','Comedy'],l:'Hindi',d:'1h 55m',r:'A',s:7.1,c:['#7a3fe0','#150a25'],o:'First-years find out why Room 13 has been empty since 1998.'},
+ {id:8,t:'Gold Rush Road',g:['Action','Adventure'],l:'Telugu',d:'2h 52m',r:'U/A',s:8.0,c:['#e0a100','#6b1d1d'],o:'A truck, a map and four crews racing across the desert to a buried vault.'}
+];
+const brands=['PVR Cinemas','INOX Megaplex','Cinépolis'];
+const slots=[['10:30 AM','01:45 PM','05:10 PM','09:00 PM'],['11:15 AM','02:30 PM','06:20 PM','10:10 PM'],['09:50 AM','12:55 PM','04:30 PM','08:15 PM']];
+const mult=[1,1.2,.9], rows='ABCDEFGH', tier=i=>i<3?180:i<6?260:380, tierName=i=>i<3?'Silver':i<6?'Gold':'Premium';
+const days=[...Array(5)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()+i);return d});
+const dl=d=>d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+const $=s=>document.querySelector(s);
+let genre='All',st={};
+
+function hash(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function save(b){try{const a=JSON.parse(localStorage.getItem('st_b')||'[]');a.unshift(b);localStorage.setItem('st_b',JSON.stringify(a))}catch(e){}}
+function load(){try{return JSON.parse(localStorage.getItem('st_b')||'[]')}catch(e){return[]}}
+function taken(key){const r=rng(hash(key)),s=new Set();rows.split('').forEach(x=>{for(let n=1;n<=10;n++)if(r()<.27)s.add(x+n)});return s}
+
+function home(){
+  const gs=['All',...new Set(movies.flatMap(m=>m.g))];
+  $('#chips').innerHTML=gs.map(g=>`<button class="chip ${g===genre?'on':''}" onclick="genre='${g}';home()">${g}</button>`).join('');
+  $('#h1').textContent='Now showing in '+$('#city').value;
+  const q=$('#q').value.toLowerCase();
+  const list=movies.filter(m=>(genre==='All'||m.g.includes(genre))&&m.t.toLowerCase().includes(q));
+  $('#grid').innerHTML=list.length?list.map(m=>`<button class="m" onclick="openMovie(${m.id})"><div class="poster" style="background:linear-gradient(160deg,${m.c[0]},${m.c[1]})"><span class="score">★ ${m.s}</span><h3>${m.t}</h3><small>${m.r}</small></div><p>${m.t}</p><span>${m.g.join(', ')} · ${m.l}</span></button>`).join(''):'<p class="empty">No movies match your search. Try another title or genre.</p>';
+}
+function poster(m){return `<div class="poster" style="background:linear-gradient(160deg,${m.c[0]},${m.c[1]})"><h3>${m.t}</h3></div>`}
+function show(html){const v=$('#view');v.innerHTML=html;v.classList.add('open');v.scrollTop=0}
+function close(){$('#view').classList.remove('open')}
+
+function openMovie(id){st={m:movies.find(m=>m.id===id),d:0,th:null,si:null,seats:new Set()};draw()}
+function draw(){
+  const {m}=st,city=$('#city').value;
+  let h=`<div class="wrap"><button class="back" onclick="close()">← Back to movies</button>
+  <div class="head">${poster(m)}<div><h2 style="font-size:2rem;letter-spacing:-.03em">${m.t}</h2><div class="tags"><b>${m.r}</b><b>${m.l}</b><b>${m.d}</b><b>★ ${m.s}/10</b>${m.g.map(g=>`<b>${g}</b>`).join('')}</div><p>${m.o}</p></div></div>
+  <div class="dates">${days.map((d,i)=>`<button class="date ${i===st.d?'on':''}" onclick="st.d=${i};st.th=null;st.si=null;st.seats.clear();draw()">${dl(d)}</button>`).join('')}</div>`;
+  h+=brands.map((b,ti)=>`<div class="th"><h4>${b}, ${city}</h4><div class="times">${slots[ti].map((t,si)=>`<button class="time ${st.th===ti&&st.si===si?'on':''}" onclick="pickShow(${ti},${si})">${t}</button>`).join('')}</div></div>`).join('');
+  if(st.th!==null){
+    const key=[m.id,st.d,st.th,st.si,city].join('|'),tk=taken(key);
+    h+=`<div class="seats"><div class="screen"></div><p class="scr-l">Screen this way</p>`;
+    rows.split('').forEach((r,i)=>{
+      if(i===0||tier(i)!==tier(i-1))h+=`<p class="tier">${tierName(i)} · ₹${Math.round(tier(i)*mult[st.th])}</p>`;
+      h+=`<div class="row"><i>${r}</i>`+[...Array(10)].map((_,n)=>{const id=r+(n+1),t=tk.has(id);return `<button class="s ${t?'t':''} ${st.seats.has(id)?'on':''}" ${t?'disabled':''} aria-label="Seat ${id}" onclick="seat('${id}')">${n+1}</button>`}).join('')+`</div>`;
+    });
+    h+=`<div class="legend"><span><u></u>Available</span><span><u style="background:var(--green)"></u>Selected</span><span><u style="background:var(--line);border-color:var(--line)"></u>Sold</span></div></div>`;
+  }
+  h+=`</div>`;
+  if(st.th!==null){const n=st.seats.size;h+=`<div class="pay"><div><span>${n?n+' seat'+(n>1?'s':'')+': '+[...st.seats].join(', '):'Select your seats'}</span><button ${n?'':'disabled'} onclick="pay()">Pay ₹${total()}</button></div></div>`}
+  const y=$('#view').scrollTop;show(h);$('#view').scrollTop=y;
+}
+function pickShow(ti,si){st.th=ti;st.si=si;st.seats.clear();draw();setTimeout(()=>document.querySelector('.seats')?.scrollIntoView({behavior:'smooth',block:'center'}),30)}
+function seat(id){st.seats.has(id)?st.seats.delete(id):st.seats.size<8?st.seats.add(id):alert('You can book up to 8 seats at a time.');draw()}
+function total(){return [...st.seats].reduce((a,s)=>a+Math.round(tier(rows.indexOf(s[0]))*mult[st.th]),0)}
+function pay(){
+  const b={id:'ST'+(hash(Date.now()+'')%1e6).toString().padStart(6,'0'),mid:st.m.id,th:brands[st.th]+', '+$('#city').value,date:dl(days[st.d]),time:slots[st.th][st.si],seats:[...st.seats].sort(),total:total()};
+  save(b);ticket(b,true);
+}
+function qr(id){const r=rng(hash(id));let s='';for(let y=0;y<13;y++)for(let x=0;x<13;x++){const f=(x<3&&y<3)||(x>9&&y<3)||(x<3&&y>9);if(f||r()<.5)s+=`<rect x="${x}" y="${y}" width="1" height="1"/>`}return `<svg viewBox="0 0 13 13" fill="#1c1733" role="img" aria-label="Ticket code">${s}</svg>`}
+function ticket(b,fresh){
+  const m=movies.find(x=>x.id===b.mid);
+  show(`<div class="wrap">${fresh?'<p class="ok">Booking confirmed</p>':'<button class="back" onclick="myTickets()">← All tickets</button>'}
+  <div class="ticket"><div class="top" style="background:linear-gradient(160deg,${m.c[0]},${m.c[1]})"><h2>${m.t}</h2><p>${m.l} · ${m.r}</p></div>
+  <dl><div><dt>Date</dt><dd>${b.date}</dd></div><div><dt>Time</dt><dd>${b.time}</dd></div><div style="grid-column:span 2"><dt>Theatre</dt><dd>${b.th}</dd></div><div><dt>Seats</dt><dd>${b.seats.join(', ')}</dd></div><div><dt>Paid</dt><dd>₹${b.total}</dd></div></dl>
+  <div class="qr">${qr(b.id)}<p>Booking ID ${b.id}</p></div></div>
+  <button class="btn" onclick="close()">Done</button></div>`);
+}
+function myTickets(){
+  const a=load();
+  show(`<div class="wrap"><button class="back" onclick="close()">← Back to movies</button><h2 style="font-size:2rem;letter-spacing:-.03em;margin-bottom:16px">My tickets</h2>`+
+  (a.length?a.map((b,i)=>{const m=movies.find(x=>x.id===b.mid);return `<button class="th" style="width:100%;text-align:left" onclick='ticket(load()[${i}],false)'><h4>${m.t}</h4><span style="color:var(--mute)">${b.date}, ${b.time} · ${b.seats.join(', ')}</span></button>`}).join(''):'<p class="empty">No tickets yet. Pick a movie and choose your seats to book one.</p>')+'</div>');
+}
+$('#city').onchange=home;$('#q').oninput=home;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+home();
+</script>
+</body>
+</html>
