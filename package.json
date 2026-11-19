@@ -1,0 +1,12 @@
+{
+  "name": "showtime",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Movie ticket booking website",
+  "scripts": {
+    "test": "node --test tests/"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.1"
+  }
+}
